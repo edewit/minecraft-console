@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hello CommonJS!</title>
+</head>
+<body>
+<div id="log"></div>
+
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="//cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>
+<script src="node_modules/vertx3-eventbus-client/vertx-eventbus.js"></script>
+<script>
+  var eb = new EventBus('/eventbus/');
+
+  eb.onopen = function () {
+    eb.registerHandler('ch.nerdin.minecraft.console', function (err, msg) {
+      $('#log').append('<div>' + msg.body.line + '</div>');
+    });
+
+    eb.send('ch.nerdin.minecraft.connect', {}, function(error, reply) {
+      $.each(reply.body, function( index, value ) {
+        $('#log').append('<div>' + value + '</div>');
+      });
+    })
+  };
+
+  function send(command) {
+    eb.publish('ch.nerdin.minecraft.command', command);
+  }
+</script>
+<form>
+  <input type="text" name="command"/>
+  <button type="button" onclick="send(this.form.elements['command'].value)">Send</button>
+</form>
+</body>
+</html>
